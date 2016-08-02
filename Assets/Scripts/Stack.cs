@@ -359,24 +359,25 @@ public class Stack : MonoBehaviour {
 			}
 			break;
 		case 4:
-			if (stackColor.b - CHANGE_FACTOR < 50) {
+			if (stackColor.r - CHANGE_FACTOR < 50) {
 				goto case 5;
 			} else {
-				stackColor.b -= CHANGE_FACTOR;
+				stackColor.r -= CHANGE_FACTOR;
 			}
 			break;
 		case 5:
-			if (stackColor.r - CHANGE_FACTOR < 50) {
+			if (stackColor.g - CHANGE_FACTOR < 50) {
 				goto case 6;
 			} else {
 				stackColor.g -= CHANGE_FACTOR;
 			}
 			break;
 		case 6:
-			if (stackColor.r - CHANGE_FACTOR < 50) {
+			
+			if (stackColor.b - CHANGE_FACTOR < 50) {
 				goto case 1;
 			} else {
-				stackColor.r -= CHANGE_FACTOR;
+				stackColor.b -= CHANGE_FACTOR;
 			}
 			break;
 		}
@@ -433,24 +434,26 @@ public class Stack : MonoBehaviour {
 			}
 			break;
 		case 4:
-			if (movingColor.b - CHANGE_FACTOR < 50) {
+			if (movingColor.r - CHANGE_FACTOR < 50) {
 				goto case 5;
 			} else {
-				movingColor.b -= CHANGE_FACTOR;
+				movingColor.r -= CHANGE_FACTOR;
 			}
 			break;
 		case 5:
-			if (movingColor.r - CHANGE_FACTOR < 50) {
+			
+			if (movingColor.g - CHANGE_FACTOR < 50) {
 				goto case 6;
 			} else {
 				movingColor.g -= CHANGE_FACTOR;
 			}
 			break;
 		case 6:
-			if (movingColor.r - CHANGE_FACTOR < 50) {
+			
+			if (movingColor.b - CHANGE_FACTOR < 50) {
 				goto case 1;
 			} else {
-				movingColor.r -= CHANGE_FACTOR;
+				movingColor.b -= CHANGE_FACTOR;
 			}
 			break;
 		}
