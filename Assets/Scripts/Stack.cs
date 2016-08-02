@@ -7,6 +7,7 @@ public class Stack : MonoBehaviour {
 
 	public Color32 stackColor;
 	public Color32 burntColor;
+	public Color32 movingColor;
 	public Material stackMaterial;
 	public GameObject endPanel;
 	public GameObject flameParticle;
@@ -21,11 +22,13 @@ public class Stack : MonoBehaviour {
 	private const float BOUNDS_SIZE = 5.0f;
 	private const float STACK_SIZE = 3.5f;
 	private const float MOVE_SPEED = 5.0f;
-	private const float ERR_MARGIN = 0.1f;
+	private const float ERR_MARGIN = 0.25f;
 	private const float STACK_GAIN = 0.5f;
-	private const int COMBO_START_GAIN = 1;
 	private const float ORIG_TILE_SPEED = 2.5f;
 	private const float TILE_SPEEDUP = 0.02f;
+	private const int COMBO_START_GAIN = 1;
+	private const int CHANGE_COUNT = 16;
+	private const int CHANGE_FACTOR = 10;
 
 	private AudioSource audio;
 
@@ -34,6 +37,8 @@ public class Stack : MonoBehaviour {
 	private int stackIndex;
 	private int scoreCount = 0;
 	private int combo = 0;
+	private int colorCount = 0;
+	private int colorState;
 
 	private float tileTransition = 0.0f;
 	private float tileSpeed = 2.0f;
@@ -52,13 +57,25 @@ public class Stack : MonoBehaviour {
 
 		audio = GetComponent<AudioSource> ();
 
+		System.Random rnd = new System.Random ();
+		colorState = rnd.Next (1,7);
+		float red = (float)(rnd.NextDouble ()* (0.76 - 0.22) + 0.22);
+		float green = (float)(rnd.NextDouble ()* (0.76 - 0.22) + 0.22);
+		float blue = (float)(rnd.NextDouble ()* (0.76 - 0.22) + 0.22);
+		Color newColor = new Color (red,green,blue,1.0f);
+		stackColor = newColor;
+		movingColor = stackColor;
+
 		highScoreText.text = PlayerPrefs.GetInt ("score").ToString();
 		
 		stacks = new GameObject[transform.childCount];
 
-		for (int i = 0; i < transform.childCount; i++) {
+		for (int i = 0; i < transform.childCount/2 ; i++) {
 			stacks[i] = transform.GetChild(i).gameObject;
+			stacks[transform.childCount-1-i] = transform.GetChild(transform.childCount-1-i).gameObject;
+			ColorMeshBuild ();
 			ColorMesh(stacks[i].GetComponent<MeshFilter>().mesh);
+			ColorMesh(stacks[transform.childCount-1-i].GetComponent<MeshFilter>().mesh);
 		}
 
 		stackIndex = transform.childCount - 1;
@@ -79,6 +96,8 @@ public class Stack : MonoBehaviour {
 
 			if (PlaceTile ()) {
 				SpawnTile ();
+
+				ChangeColor ();
 
 				scoreCount++;
 				scoreText.text = scoreCount.ToString ();
@@ -256,7 +275,7 @@ public class Stack : MonoBehaviour {
 		stacks [stackIndex].transform.localPosition = new Vector3 (0, scoreCount, 0);
 		stacks [stackIndex].transform.localScale = new Vector3 (stackBounds.x, 1, stackBounds.y);
 
-		ColorMesh (stacks [stackIndex].GetComponent<MeshFilter> ().mesh);
+		ColorMeshMoving (stacks [stackIndex].GetComponent<MeshFilter> ().mesh);
 
 	}
 
@@ -290,6 +309,17 @@ public class Stack : MonoBehaviour {
 		mesh.colors32 = colors;
 	}
 
+	private void ColorMeshMoving(Mesh mesh) {
+		Vector3[] vertices = mesh.vertices;
+		Color32[] colors = new Color32[vertices.Length];
+
+		for (int i = 0; i < vertices.Length; i++) {
+			colors [i] = movingColor;
+		}
+
+		mesh.colors32 = colors;
+	}
+
 	private void ColorMeshBurnt(Mesh mesh) {
 		Vector3[] vertices = mesh.vertices;
 		Color32[] colors = new Color32[vertices.Length];
@@ -299,6 +329,57 @@ public class Stack : MonoBehaviour {
 		}
 
 		mesh.colors32 = colors;
+	}
+
+	private void ColorMeshBuild() {
+
+		System.Random randC = new System.Random ();
+		int randState = randC.Next (1,7);
+
+		switch (randState) {
+		case 1:	
+			if (stackColor.r + CHANGE_FACTOR > 200) {
+				goto case 2;	
+			} else {
+				stackColor.r += CHANGE_FACTOR;
+			}
+			break;
+		case 2:
+			if (stackColor.g + CHANGE_FACTOR > 200) {
+				goto case 3;
+			} else {
+				stackColor.g += CHANGE_FACTOR;
+			}
+			break;
+		case 3:
+			if (stackColor.b + CHANGE_FACTOR > 200) {
+				goto case 4;
+			} else {
+				stackColor.b += CHANGE_FACTOR;
+			}
+			break;
+		case 4:
+			if (stackColor.b - CHANGE_FACTOR < 50) {
+				goto case 5;
+			} else {
+				stackColor.b -= CHANGE_FACTOR;
+			}
+			break;
+		case 5:
+			if (stackColor.r - CHANGE_FACTOR < 50) {
+				goto case 6;
+			} else {
+				stackColor.g -= CHANGE_FACTOR;
+			}
+			break;
+		case 6:
+			if (stackColor.r - CHANGE_FACTOR < 50) {
+				goto case 1;
+			} else {
+				stackColor.r -= CHANGE_FACTOR;
+			}
+			break;
+		}
 	}
 
 	private void playCircle(float x, float z) {
@@ -319,6 +400,62 @@ public class Stack : MonoBehaviour {
 		} else {
 			smallParticle.Stop ();
 		}
+	}
+
+	private void ChangeColor(){
+
+		if (colorCount > CHANGE_COUNT) {
+			colorCount = 0;
+			System.Random rnd = new System.Random ();
+			colorState = rnd.Next (1,7);
+		}
+
+		switch (colorState) {
+		case 1:	
+			if (movingColor.r + CHANGE_FACTOR > 200) {
+				goto case 2;	
+			} else {
+				movingColor.r += CHANGE_FACTOR;
+			}
+			break;
+		case 2:
+			if (movingColor.g + CHANGE_FACTOR > 200) {
+				goto case 3;
+			} else {
+				movingColor.g += CHANGE_FACTOR;
+			}
+			break;
+		case 3:
+			if (movingColor.b + CHANGE_FACTOR > 200) {
+				goto case 4;
+			} else {
+				movingColor.b += CHANGE_FACTOR;
+			}
+			break;
+		case 4:
+			if (movingColor.b - CHANGE_FACTOR < 50) {
+				goto case 5;
+			} else {
+				movingColor.b -= CHANGE_FACTOR;
+			}
+			break;
+		case 5:
+			if (movingColor.r - CHANGE_FACTOR < 50) {
+				goto case 6;
+			} else {
+				movingColor.g -= CHANGE_FACTOR;
+			}
+			break;
+		case 6:
+			if (movingColor.r - CHANGE_FACTOR < 50) {
+				goto case 1;
+			} else {
+				movingColor.r -= CHANGE_FACTOR;
+			}
+			break;
+		}
+
+		colorCount++;
 	}
 
 	private void End() {
