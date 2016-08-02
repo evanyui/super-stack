@@ -11,8 +11,8 @@ public class Share : MonoBehaviour {
 
 	public void rate()
 	{
-		print("Please Support Us" + Application.bundleIdentifier);
-		Application.OpenURL("http://play.google.com/store/apps/details?id=com.evanyui.superstack" + Application.bundleIdentifier);
+		print("Please Support Us");
+		Application.OpenURL("http://play.google.com/store/apps/details?id=com.evanyui.superstack");
 
 	}
 }
